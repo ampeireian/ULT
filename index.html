@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uganda School Lesson Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4e73df;
+            --secondary: #6f42c1;
+            --accent1: #1cc88a;
+            --accent2: #36b9cc;
+            --light: #f8f9fc;
+            --dark: #5a5c69;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        .login-container, .register-container {
+            max-width: 400px;
+            margin: 100px auto;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            animation: slideIn 0.5s ease;
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+        }
+        
+        .bg-primary {
+            background-color: var(--primary) !important;
+        }
+        
+        .bg-success {
+            background-color: var(--accent1) !important;
+        }
+        
+        .bg-info {
+            background-color: var(--accent2) !important;
+        }
+        
+        .text-primary {
+            color: var(--primary) !important;
+        }
+        
+        .progress {
+            height: 10px;
+            border-radius: 10px;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary) !important;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .lesson-card {
+            border-left: 4px solid var(--primary);
+        }
+        
+        .stats-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        .camera-container {
+            width: 100%;
+            height: 250px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #dee2e6;
+        }
+        
+        .camera-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .camera-placeholder {
+            color: #6c757d;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .theme-color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 5px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .theme-color-option.selected {
+            border-color: #495057;
+            transform: scale(1.1);
+        }
+        
+        .phone-input-group {
+            position: relative;
+        }
+        
+        .phone-flag {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 15px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30"><path d="M0 0h60v30H0z" fill="#FCD116"/><path d="M0 0h20v30H0z" fill="#000000"/><path d="M40 0h20v30H40z" fill="#CE1126"/></svg>') no-repeat center center;
+            background-size: contain;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .login-container, .register-container {
+                margin: 50px auto;
+                padding: 0 15px;
+            }
+            
+            .dashboard-container {
+                padding: 0 15px;
+            }
+            
+            .card {
+                margin-bottom: 15px;
+            }
+            
+            .camera-container {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-book-open me-2"></i>Uganda Lesson Tracker
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a id="loginNav" class="nav-link active" href="#"><i class="fas fa-sign-in-alt me-1"></i> Login</a>
+                <a id="registerNav" class="nav-link" href="#"><i class="fas fa-school me-1"></i> Register School</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Section -->
+    <section id="loginSection" class="login-container">
+        <div class="card">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4">Teacher Login</h2>
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="schoolCode" class="form-label">School Code</label>
+                        <input type="text" class="form-control" id="schoolCode" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="teacherId" class="form-label">Teacher ID</label>
+                        <input type="text" class="form-control" id="teacherId" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <span id="loginSpinner" class="loading-spinner" style="display: none;"></span>
+                        <span id="loginText">Login</span>
+                    </button>
+                </form>
+                <div class="text-center mt-3">
+                    <a href="#" id="showAdminLogin">Admin Login</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Login Section -->
+    <section id="adminLoginSection" class="login-container" style="display: none;">
+        <div class="card">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4">Admin Login</h2>
+                <form id="adminLoginForm">
+                    <div class="mb-3">
+                        <label for="adminSchoolCode" class="form-label">School Code</label>
+                        <input type="text" class="form-control" id="adminSchoolCode" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="adminPassword" class="form-label">Admin Password</label>
+                        <input type="password" class="form-control" id="adminPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <span id="adminLoginSpinner" class="loading-spinner" style="display: none;"></span>
+                        <span id="adminLoginText">Login as Admin</span>
+                    </button>
+                </form>
+                <div class="text-center mt-3">
+                    <a href="#" id="showTeacherLogin">Teacher Login</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- School Registration Section -->
+    <section id="registerSection" class="register-container" style="display: none;">
+        <div class="card">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4">Register Your School</h2>
+                <form id="registerForm">
+                    <div class="mb-3">
+                        <label for="schoolName" class="form-label">School Name</label>
+                        <input type="text" class="form-control" id="schoolName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="schoolLocation" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="schoolLocation" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="adminName" class="form-label">Admin Name</label>
+                        <input type="text" class="form-control" id="adminName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="adminEmail" class="form-label">Admin Email</label>
+                        <input type="email" class="form-control" id="adminEmail" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="adminPass" class="form-label">Admin Password</label>
+                        <input type="password" class="form-control" id="adminPass" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <span id="registerSpinner" class="loading-spinner" style="display: none;"></span>
+                        <span id="registerText">Register School</span>
+                    </button>
+                </form>
+                <div class="text-center mt-3">
+                    <a href="#" id="showLoginFromRegister">Back to Login</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Teacher Dashboard -->
+    <section id="teacherDashboard" class="dashboard-container" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Teacher Dashboard</h2>
+            <button id="logoutBtn" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt me-1"></i> Logout
+            </button>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Submit New Lesson</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="lessonForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="subject" class="form-label">Subject</label>
+                                    <select class="form-select" id="subject" required>
+                                        <option value="">Select Subject</option>
+                                        <optgroup label="Sciences">
+                                            <option value="Biology">Biology</option>
+                                            <option value="Physics">Physics</option>
+                                            <option value="Chemistry">Chemistry</option>
+                                        </optgroup>
+                                        <optgroup label="Languages">
+                                            <option value="English">English</option>
+                                            <option value="Literature">Literature</option>
+                                            <option value="Kiswahili">Kiswahili</option>
+                                            <option value="French">French</option>
+                                        </optgroup>
+                                        <optgroup label="Humanities">
+                                            <option value="CRE">CRE</option>
+                                            <option value="IRE">IRE</option>
+                                            <option value="Entrepreneurship">Entrepreneurship</option>
+                                        </optgroup>
+                                        <optgroup label="Other">
+                                            <option value="ICT">ICT</option>
+                                            <option value="Art and Design">Art and Design</option>
+                                            <option value="Physical Education">Physical Education</option>
+                                            <option value="Mathematics">Mathematics</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="paper" class="form-label">Paper</label>
+                                    <select class="form-select" id="paper">
+                                        <option value="">Not Applicable</option>
+                                        <option value="Paper 1">Paper 1</option>
+                                        <option value="Paper 2">Paper 2</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="class" class="form-label">Class</label>
+                                    <input type="text" class="form-control" id="class" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="stream" class="form-label">Stream</label>
+                                    <input type="text" class="form-control" id="stream" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="theme" class="form-label">Theme</label>
+                                <input type="text" class="form-control" id="theme" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="topic" class="form-label">Topic</label>
+                                <input type="text" class="form-control" id="topic" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="details" class="form-label">Lesson Details</label>
+                                <textarea class="form-control" id="details" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-paper-plane me-1"></i> Submit Lesson
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Submissions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentLessons" class="list-group">
+                            <!-- Recent lessons will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <i class="fas fa-chart-pie feature-icon"></i>
+                        <h3>Term Progress</h3>
+                        <p class="text-muted">Your lesson submissions this term</p>
+                        <div class="stats-number" id="lessonCount">0</div>
+                        <div class="progress mt-3">
+                            <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <p class="mt-2 small" id="progressText">0% of target reached</p>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Subject Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="subjectChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Dashboard -->
+    <section id="adminDashboard" class="dashboard-container" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Admin Dashboard</h2>
+            <div>
+                <span class="me-3" id="adminSchoolName">School Name</span>
+                <button id="adminLogoutBtn" class="btn btn-outline-danger">
+                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                </button>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>School Overview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 text-center">
+                                <div class="stats-card">
+                                    <i class="fas fa-chalkboard-teacher feature-icon"></i>
+                                    <h4>Teachers</h4>
+                                    <div class="stats-number" id="teacherCount">0</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="stats-card">
+                                    <i class="fas fa-book feature-icon"></i>
+                                    <h4>Lessons</h4>
+                                    <div class="stats-number" id="totalLessonCount">0</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="stats-card">
+                                    <i class="fas fa-check-circle feature-icon"></i>
+                                    <h4>This Week</h4>
+                                    <div class="stats-number" id="weekLessonCount">0</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="stats-card">
+                                    <i class="fas fa-subscript feature-icon"></i>
+                                    <h4>Subjects</h4>
+                                    <div class="stats-number" id="subjectCount">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>All Lesson Submissions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Teacher</th>
+                                        <th>Class</th>
+                                        <th>Subject</th>
+                                        <th>Topic</th>
+                                        <th>Theme</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allLessonsTable">
+                                    <!-- All lessons will be displayed here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Weekly Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="weeklyChart" height="250"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Teacher Management</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="addTeacherForm">
+                            <div class="mb-3">
+                                <label for="newTeacherId" class="form-label">Teacher ID</label>
+                                <input type="text" class="form-control" id="newTeacherId" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="newTeacherName" class="form-label">Teacher Name</label>
+                                <input type="text" class="form-control" id="newTeacherName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="newTeacherPhone" class="form-label">Phone Number</label>
+                                <div class="phone-input-group">
+                                    <div class="phone-flag"></div>
+                                    <input type="tel" class="form-control ps-4" id="newTeacherPhone" placeholder="772123456" required>
+                                </div>
+                                <div class="form-text">UG phone number without country code</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="newTeacherPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="newTeacherPassword" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Teacher Photo</label>
+                                <div class="camera-container">
+                                    <div class="camera-placeholder" id="cameraPlaceholder">
+                                        <i class="fas fa-camera fa-3x mb-2"></i>
+                                        <p>Click to capture photo</p>
+                                    </div>
+                                    <video id="video" class="camera-preview" style="display: none;"></video>
+                                    <canvas id="canvas" style="display: none;"></canvas>
+                                </div>
+                                <button type="button" id="captureBtn" class="btn btn-outline-primary w-100 mb-2">
+                                    <i class="fas fa-camera me-1"></i> Capture Photo
+                                </button>
+                                <input type="hidden" id="teacherPhotoData">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-plus-circle me-1"></i> Add Teacher
+                            </button>
+                        </form>
+                        <div class="mt-3">
+                            <h6>Current Teachers</h6>
+                            <ul class="list-group" id="teachersList">
+                                <!-- Teachers will be listed here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-palette me-2"></i>Customize Theme</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Primary Color</label>
+                            <div>
+                                <div class="theme-color-option selected" style="background-color: #4e73df;" data-color="#4e73df"></div>
+                                <div class="theme-color-option" style="background-color: #e74a3b;" data-color="#e74a3b"></div>
+                                <div class="theme-color-option" style="background-color: #1cc88a;" data-color="#1cc88a"></div>
+                                <div class="theme-color-option" style="background-color: #6f42c1;" data-color="#6f42c1"></div>
+                                <div class="theme-color-option" style="background-color: #f6c23e;" data-color="#f6c23e"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secondary Color</label>
+                            <div>
+                                <div class="theme-color-option" style="background-color: #6f42c1;" data-color="#6f42c1"></div>
+                                <div class="theme-color-option selected" style="background-color: #5a5c69;" data-color="#5a5c69"></div>
+                                <div class="theme-color-option" style="background-color: #2c9faf;" data-color="#2c9faf"></div>
+                                <div class="theme-color-option" style="background-color: #4e73df;" data-color="#4e73df"></div>
+                                <div class="theme-color-option" style="background-color: #36b9cc;" data-color="#36b9cc"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Accent 1</label>
+                            <div>
+                                <div class="theme-color-option" style="background-color: #1cc88a;" data-color="#1cc88a"></div>
+                                <div class="theme-color-option" style="background-color: #4e73df;" data-color="#4e73df"></div>
+                                <div class="theme-color-option selected" style="background-color: #f6c23e;" data-color="#f6c23e"></div>
+                                <div class="theme-color-option" style="background-color: #e74a3b;" data-color="#e74a3b"></div>
+                                <div class="theme-color-option" style="background-color: #6f42c1;" data-color="#6f42c1"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Accent 2</label>
+                            <div>
+                                <div class="theme-color-option" style="background-color: #36b9cc;" data-color="#36b9cc"></div>
+                                <div class="theme-color-option" style="background-color: #1cc88a;" data-color="#1cc88a"></div>
+                                <div class="theme-color-option" style="background-color: #6f42c1;" data-color="#6f42c1"></div>
+                                <div class="theme-color-option selected" style="background-color: #4e73df;" data-color="#4e73df"></div>
+                                <div class="theme-color-option" style="background-color: #f6c23e;" data-color="#f6c23e"></div>
+                            </div>
+                        </div>
+                        <button id="saveThemeBtn" class="btn btn-primary w-100">
+                            <i class="fas fa-save me-1"></i> Save Theme
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Data storage and initialization
+        function initializeStorage() {
+            if (!localStorage.getItem('schools')) {
+                localStorage.setItem('schools', JSON.stringify([]));
+            }
+            if (!localStorage.getItem('teachers')) {
+                localStorage.setItem('teachers', JSON.stringify([]));
+            }
+            if (!localStorage.getItem('lessons')) {
+                localStorage.setItem('lessons', JSON.stringify([]));
+            }
+            if (!localStorage.getItem('themeSettings')) {
+                localStorage.setItem('themeSettings', JSON.stringify({}));
+            }
+        }
+
+        // Generate a unique school code
+        function generateSchoolCode() {
+            return 'SCH' + Math.random().toString(36).substr(2, 5).toUpperCase();
+        }
+
+        // Get location from phone number (simulated)
+        function getLocationFromPhone(phone) {
+            // Simulate getting location based on phone number
+            const locations = [
+                "Kampala", "Entebbe", "Jinja", "Gulu", "Mbale", "Mbarara", "Fort Portal", "Soroti", "Lira", "Arua"
+            ];
+            // Use the phone number to "determine" location (just a simulation)
+            const index = parseInt(phone.substring(phone.length - 1)) % locations.length;
+            return locations[index];
+        }
+
+        // Toggle paper option based on subject
+        function togglePaperOption() {
+            const subject = document.getElementById('subject').value;
+            const paperSelect = document.getElementById('paper');
+            
+            const paperSubjects = [
+                'Biology', 'Physics', 'Chemistry', 'Mathematics', 
+                'Entrepreneurship', 'French', 'Art and Design'
+            ];
+            
+            if (paperSubjects.includes(subject)) {
+                paperSelect.disabled = false;
+                paperSelect.querySelector('option[value=""]').textContent = 'Select Paper';
+            } else {
+                paperSelect.disabled = true;
+                paperSelect.value = '';
+                paperSelect.querySelector('option[value=""]').textContent = 'Not Applicable';
+            }
+        }
+
+        // Navigation functions
+        function showSection(sectionId) {
+            document.querySelectorAll('section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+        }
+
+        // Show loading spinner on a button
+        function showLoading(buttonId, spinnerId, textId) {
+            document.getElementById(spinnerId).style.display = 'inline-block';
+            document.getElementById(textId).style.display = 'none';
+            document.getElementById(buttonId).disabled = true;
+        }
+
+        // Hide loading spinner on a button
+        function hideLoading(buttonId, spinnerId, textId) {
+            document.getElementById(spinnerId).style.display = 'none';
+            document.getElementById(textId).style.display = 'inline';
+            document.getElementById(buttonId).disabled = false;
+        }
+
+        // Initialize camera for teacher registration
+        function initCamera() {
+            const video = document.getElementById('video');
+            const captureBtn = document.getElementById('captureBtn');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+            
+            let stream = null;
+
+            captureBtn.addEventListener('click', function() {
+                if (stream) {
+                    // Capture photo
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    // Convert to data URL and store
+                    const dataUrl = canvas.toDataURL('image/png');
+                    document.getElementById('teacherPhotoData').value = dataUrl;
+                    
+                    // Stop stream
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                    
+                    // Show placeholder again
+                    video.style.display = 'none';
+                    cameraPlaceholder.style.display = 'flex';
+                    captureBtn.innerHTML = '<i class="fas fa-camera me-1"></i> Capture Photo';
+                    
+                    alert('Photo captured successfully!');
+                } else {
+                    // Start camera
+                    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+                        .then(function(mediaStream) {
+                            stream = mediaStream;
+                            video.srcObject = stream;
+                            video.style.display = 'block';
+                            cameraPlaceholder.style.display = 'none';
+                            captureBtn.innerHTML = '<i class="fas fa-camera me-1"></i> Capture Now';
+                        })
+                        .catch(function(err) {
+                            console.error('Error accessing camera:', err);
+                            alert('Could not access camera. Please ensure you have granted permission.');
+                        });
+                }
+            });
+        }
+
+        // Apply theme colors
+        function applyTheme(primary, secondary, accent1, accent2) {
+            document.documentElement.style.setProperty('--primary', primary);
+            document.documentElement.style.setProperty('--secondary', secondary);
+            document.documentElement.style.setProperty('--accent1', accent1);
+            document.documentElement.style.setProperty('--accent2', accent2);
+        }
+
+        // School registration
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            showLoading('registerForm', 'registerSpinner', 'registerText');
+            
+            setTimeout(function() {
+                const schoolName = document.getElementById('schoolName').value;
+                const schoolLocation = document.getElementById('schoolLocation').value;
+                const adminName = document.getElementById('adminName').value;
+                const adminEmail = document.getElementById('adminEmail').value;
+                const adminPass = document.getElementById('adminPass').value;
+                
+                const schoolCode = generateSchoolCode();
+                
+                const schools = JSON.parse(localStorage.getItem('schools'));
+                schools.push({
+                    code: schoolCode,
+                    name: schoolName,
+                    location: schoolLocation,
+                    admin: {
+                        name: adminName,
+                        email: adminEmail,
+                        password: adminPass
+                    }
+                });
+                
+                localStorage.setItem('schools', JSON.stringify(schools));
+                
+                hideLoading('registerForm', 'registerSpinner', 'registerText');
+                alert(`School registered successfully! Your school code is: ${schoolCode}. Please share this with your teachers.`);
+                showSection('loginSection');
+            }, 1500);
+        });
+
+        // Teacher login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            showLoading('loginForm', 'loginSpinner', 'loginText');
+            
+            setTimeout(function() {
+                const schoolCode = document.getElementById('schoolCode').value;
+                const teacherId = document.getElementById('teacherId').value;
+                const password = document.getElementById('password').value;
+                
+                const teachers = JSON.parse(localStorage.getItem('teachers'));
+                const teacher = teachers.find(t => 
+                    t.schoolCode === schoolCode && 
+                    t.teacherId === teacherId && 
+                    t.password === password
+                );
+                
+                if (teacher) {
+                    // Store current session
+                    sessionStorage.setItem('currentTeacher', JSON.stringify(teacher));
+                    sessionStorage.setItem('currentSchoolCode', schoolCode);
+                    
+                    // Apply school theme if exists
+                    const themeSettings = JSON.parse(localStorage.getItem('themeSettings'));
+                    const schoolTheme = themeSettings[schoolCode];
+                    if (schoolTheme) {
+                        applyTheme(schoolTheme.primary, schoolTheme.secondary, schoolTheme.accent1, schoolTheme.accent2);
+                    }
+                    
+                    // Load teacher dashboard
+                    loadTeacherDashboard();
+                    showSection('teacherDashboard');
+                } else {
+                    alert('Invalid credentials. Please try again.');
+                }
+                
+                hideLoading('loginForm', 'loginSpinner', 'loginText');
+            }, 1000);
+        });
+
+        // Admin login
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            showLoading('adminLoginForm', 'adminLoginSpinner', 'adminLoginText');
+            
+            setTimeout(function() {
+                const schoolCode = document.getElementById('adminSchoolCode').value;
+                const password = document.getElementById('adminPassword').value;
+                
+                const schools = JSON.parse(localStorage.getItem('schools'));
+                const school = schools.find(s => 
+                    s.code === schoolCode && 
+                    s.admin.password === password
+                );
+                
+                if (school) {
+                    // Store current session
+                    sessionStorage.setItem('currentSchoolCode', schoolCode);
+                    
+                    // Apply school theme if exists
+                    const themeSettings = JSON.parse(localStorage.getItem('themeSettings'));
+                    const schoolTheme = themeSettings[schoolCode];
+                    if (schoolTheme) {
+                        applyTheme(schoolTheme.primary, schoolTheme.secondary, schoolTheme.accent1, schoolTheme.accent2);
+                    }
+                    
+                    // Load admin dashboard
+                    loadAdminDashboard();
+                    showSection('adminDashboard');
+                } else {
+                    alert('Invalid admin credentials. Please try again.');
+                }
+                
+                hideLoading('adminLoginForm', 'adminLoginSpinner', 'adminLoginText');
+            }, 1000);
+        });
+
+        // Lesson submission
+        document.getElementById('lessonForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const subject = document.getElementById('subject').value;
+            const paper = document.getElementById('paper').value;
+            const classValue = document.getElementById('class').value;
+            const stream = document.getElementById('stream').value;
+            const theme = document.getElementById('theme').value;
+            const topic = document.getElementById('topic').value;
+            const details = document.getElementById('details').value;
+            
+            const currentTeacher = JSON.parse(sessionStorage.getItem('currentTeacher'));
+            const schoolCode = sessionStorage.getItem('currentSchoolCode');
+            
+            const now = new Date();
+            const lesson = {
+                id: Date.now(),
+                schoolCode: schoolCode,
+                teacherId: currentTeacher.teacherId,
+                teacherName: currentTeacher.name,
+                subject: subject,
+                paper: paper,
+                class: classValue,
+                stream: stream,
+                theme: theme,
+                topic: topic,
+                details: details,
+                date: now.toISOString(),
+                dayOfWeek: now.toLocaleDateString('en-US', { weekday: 'long' }),
+                time: now.toLocaleTimeString('en-US')
+            };
+            
+            const lessons = JSON.parse(localStorage.getItem('lessons'));
+            lessons.push(lesson);
+            localStorage.setItem('lessons', JSON.stringify(lessons));
+            
+            // Reset form
+            document.getElementById('lessonForm').reset();
+            
+            // Refresh dashboard
+            loadTeacherDashboard();
+            
+            alert('Lesson submitted successfully!');
+        });
+
+        // Add teacher (admin function)
+        document.getElementById('addTeacherForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const teacherId = document.getElementById('newTeacherId').value;
+            const teacherName = document.getElementById('newTeacherName').value;
+            const teacherPhone = document.getElementById('newTeacherPhone').value;
+            const password = document.getElementById('newTeacherPassword').value;
+            const photoData = document.getElementById('teacherPhotoData').value;
+            const schoolCode = sessionStorage.getItem('currentSchoolCode');
+            
+            // Get location from phone number
+            const location = getLocationFromPhone(teacherPhone);
+            
+            const teachers = JSON.parse(localStorage.getItem('teachers'));
+            teachers.push({
+                schoolCode: schoolCode,
+                teacherId: teacherId,
+                name: teacherName,
+                phone: teacherPhone,
+                location: location,
+                password: password,
+                photo: photoData
+            });
+            
+            localStorage.setItem('teachers', JSON.stringify(teachers));
+            
+            // Reset form
+            document.getElementById('addTeacherForm').reset();
+            document.getElementById('teacherPhotoData').value = '';
+            
+            // Refresh admin dashboard
+            loadAdminDashboard();
+            
+            alert('Teacher added successfully!');
+        });
+
+        // Save theme customization
+        document.getElementById('saveThemeBtn').addEventListener('click', function() {
+            const schoolCode = sessionStorage.getItem('currentSchoolCode');
+            const primary = document.querySelector('.theme-color-option[data-color].selected:nth-child(1)').getAttribute('data-color');
+            const secondary = document.querySelector('.theme-color-option[data-color].selected:nth-child(2)').getAttribute('data-color');
+            const accent1 = document.querySelector('.theme-color-option[data-color].selected:nth-child(3)').getAttribute('data-color');
+            const accent2 = document.querySelector('.theme-color-option[data-color].selected:nth-child(4)').getAttribute('data-color');
+            
+            const themeSettings = JSON.parse(localStorage.getItem('themeSettings'));
+            themeSettings[schoolCode] = {
+                primary: primary,
+                secondary: secondary,
+                accent1: accent1,
+                accent2: accent2
+            };
+            
+            localStorage.setItem('themeSettings', JSON.stringify(themeSettings));
+            
+            // Apply the new theme
+            applyTheme(primary, secondary, accent1, accent2);
+            
+            alert('Theme saved successfully!');
+        });
+
+        // Theme color selection
+        document.querySelectorAll('.theme-color-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const parent = this.parentElement;
+                const index = Array.from(parent.children).indexOf(this);
+                
+                // Remove selected class from all options in this group
+                parent.querySelectorAll('.theme-color-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked option
+                this.classList.add('selected');
+            });
+        });
+
+        // Load teacher dashboard
+        function loadTeacherDashboard() {
+            const currentTeacher = JSON.parse(sessionStorage.getItem('currentTeacher'));
+            const schoolCode = sessionStorage.getItem('currentSchoolCode');
+            
+            // Load teacher's lessons
+            const allLessons = JSON.parse(localStorage.getItem('lessons'));
+            const teacherLessons = allLessons.filter(l => 
+                l.schoolCode === schoolCode && 
+                l.teacherId === currentTeacher.teacherId
+            );
+            
+            // Update lesson count
+            document.getElementById('lessonCount').textContent = teacherLessons.length;
+            
+            // Update progress bar (assuming target of 50 lessons per term)
+            const progress = Math.min(100, (teacherLessons.length / 50) * 100);
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${Math.round(progress)}% of target reached`;
+            
+            // Display recent lessons
+            const recentLessonsContainer = document.getElementById('recentLessons');
+            recentLessonsContainer.innerHTML = '';
+            
+            const recentLessons = teacherLessons.slice(-5).reverse();
+            recentLessons.forEach(lesson => {
+                const lessonDate = new Date(lesson.date).toLocaleDateString();
+                const lessonElement = document.createElement('div');
+                lessonElement.className = 'list-group-item';
+                lessonElement.innerHTML = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${lesson.subject}${lesson.paper ? ' (' + lesson.paper + ')' : ''} - ${lesson.topic}</h6>
+                        <small>${lessonDate}</small>
+                    </div>
+                    <p class="mb-1">Class: ${lesson.class} ${lesson.stream}</p>
+                    <small>${lesson.theme} • ${lesson.time}</small>
+                `;
+                recentLessonsContainer.appendChild(lessonElement);
+            });
+            
+            // Prepare data for subject distribution chart
+            const subjectCounts = {};
+            teacherLessons.forEach(lesson => {
+                const subjectKey = lesson.paper ? `${lesson.subject} (${lesson.paper})` : lesson.subject;
+                subjectCounts[subjectKey] = (subjectCounts[subjectKey] || 0) + 1;
+            });
+            
+            // Draw subject chart
+            const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+            if (window.subjectChartInstance) {
+                window.subjectChartInstance.destroy();
+            }
+            
+            window.subjectChartInstance = new Chart(subjectCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(subjectCounts),
+                    datasets: [{
+                        data: Object.values(subjectCounts),
+                        backgroundColor: [
+                            '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', 
+                            '#e74a3b', '#6f42c1', '#5a5c69', '#2e59d9'
+                        ]
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load admin dashboard
+        function loadAdminDashboard() {
+            const schoolCode = sessionStorage.getItem('currentSchoolCode');
+            const schools = JSON.parse(localStorage.getItem('schools'));
+            const school = schools.find(s => s.code === schoolCode);
+            
+            // Set school name
+            document.getElementById('adminSchoolName').textContent = school.name;
+            
+            // Load school teachers
+            const allTeachers = JSON.parse(localStorage.getItem('teachers'));
+            const schoolTeachers = allTeachers.filter(t => t.schoolCode === schoolCode);
+            document.getElementById('teacherCount').textContent = schoolTeachers.length;
+            
+            // Display teachers list
+            const teachersList = document.getElementById('teachersList');
+            teachersList.innerHTML = '';
+            schoolTeachers.forEach(teacher => {
+                const teacherItem = document.createElement('li');
+                teacherItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                teacherItem.innerHTML = `
+                    <div>
+                        ${teacher.name} (${teacher.teacherId})
+                        <br>
+                        <small class="text-muted">${teacher.phone} • ${teacher.location}</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger remove-teacher" data-id="${teacher.teacherId}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                teachersList.appendChild(teacherItem);
+            });
+            
+            // Load school lessons
+            const allLessons = JSON.parse(localStorage.getItem('lessons'));
+            const schoolLessons = allLessons.filter(l => l.schoolCode === schoolCode);
+            document.getElementById('totalLessonCount').textContent = schoolLessons.length;
+            
+            // Count lessons from this week
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            const recentLessons = schoolLessons.filter(l => new Date(l.date) >= oneWeekAgo);
+            document.getElementById('weekLessonCount').textContent = recentLessons.length;
+            
+            // Count unique subjects
+            const subjects = new Set(schoolLessons.map(l => l.subject));
+            document.getElementById('subjectCount').textContent = subjects.size;
+            
+            // Display all lessons in table
+            const lessonsTable = document.getElementById('allLessonsTable');
+            lessonsTable.innerHTML = '';
+            schoolLessons.slice(-10).reverse().forEach(lesson => {
+                const lessonDate = new Date(lesson.date).toLocaleDateString();
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${lessonDate}</td>
+                    <td>${lesson.teacherName}</td>
+                    <td>${lesson.class} ${lesson.stream}</td>
+                    <td>${lesson.subject}${lesson.paper ? ' (' + lesson.paper + ')' : ''}</td>
+                    <td>${lesson.topic}</td>
+                    <td>${lesson.theme}</td>
+                `;
+                lessonsTable.appendChild(row);
+            });
+            
+            // Prepare data for weekly activity chart
+            const dailyCounts = {};
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateString = date.toLocaleDateString('en-US', { weekday: 'short' });
+                dailyCounts[dateString] = 0;
+            }
+            
+            recentLessons.forEach(lesson => {
+                const day = new Date(lesson.date).toLocaleDateString('en-US', { weekday: 'short' });
+                if (dailyCounts.hasOwnProperty(day)) {
+                    dailyCounts[day]++;
+                }
+            });
+            
+            // Draw weekly chart
+            const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+            if (window.weeklyChartInstance) {
+                window.weeklyChartInstance.destroy();
+            }
+            
+            window.weeklyChartInstance = new Chart(weeklyCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(dailyCounts),
+                    datasets: [{
+                        label: 'Lessons',
+                        data: Object.values(dailyCounts),
+                        backgroundColor: '#4e73df'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Navigation event listeners
+        document.getElementById('registerNav').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('registerSection');
+        });
+
+        document.getElementById('loginNav').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('loginSection');
+        });
+
+        document.getElementById('showAdminLogin').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('adminLoginSection');
+        });
+
+        document.getElementById('showTeacherLogin').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('loginSection');
+        });
+
+        document.getElementById('showLoginFromRegister').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('loginSection');
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            sessionStorage.removeItem('currentTeacher');
+            sessionStorage.removeItem('currentSchoolCode');
+            showSection('loginSection');
+        });
+
+        document.getElementById('adminLogoutBtn').addEventListener('click', function() {
+            sessionStorage.removeItem('currentSchoolCode');
+            showSection('loginSection');
+        });
+
+        // Teacher removal (delegated event listener)
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-teacher') || 
+                e.target.parentElement.classList.contains('remove-teacher')) {
+                
+                const button = e.target.classList.contains('remove-teacher') ? 
+                    e.target : e.target.parentElement;
+                
+                const teacherId = button.getAttribute('data-id');
+                const schoolCode = sessionStorage.getItem('currentSchoolCode');
+                
+                if (confirm('Are you sure you want to remove this teacher?')) {
+                    const teachers = JSON.parse(localStorage.getItem('teachers'));
+                    const updatedTeachers = teachers.filter(t => 
+                        !(t.schoolCode === schoolCode && t.teacherId === teacherId)
+                    );
+                    
+                    localStorage.setItem('teachers', JSON.stringify(updatedTeachers));
+                    loadAdminDashboard();
+                }
+            }
+        });
+
+        // Initialize the application
+        initializeStorage();
+        showSection('loginSection');
+        
+        // Initialize camera when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initCamera();
+            
+            // Set up subject change listener for paper option
+            document.getElementById('subject').addEventListener('change', togglePaperOption);
+        });
+    </script>
+</body>
+</html>
